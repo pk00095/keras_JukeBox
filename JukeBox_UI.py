@@ -22,8 +22,10 @@ class App(QtWidgets.QMainWindow):
 class MainWindow(QtWidgets.QWidget):        
     def __init__(self, parent):   
         super(MainWindow, self).__init__(parent)
-        layout = QtWidgets.QVBoxLayout(self)
-        self.selected_operand = QLabel('\t{}'.format('f(x)=x'))
+        layout = QtWidgets.QVBoxLayout(self)  
+
+        self.run_status = 'pause'      
+        self.supported_run_statuses = ['play','pause','stop']
 
         # Run this after settings
         # Initialize tabs
@@ -35,6 +37,10 @@ class MainWindow(QtWidgets.QWidget):
         tab_holder.addTab(self.tab2,"Tab 2") #self.lang["tab_2_title"]) # Add "tab2" to the tabs holder "tabs" 
 
         layout.addWidget(tab_holder)
+
+    def setup_tab_2_variables(self, learning_rate=0.99, selected_operand='f(x)=x'):
+        self.learning_rate = learning_rate
+        self.selected_operandQLabel = QLabel('\t{}'.format(selected_operand))
 
     def setup_tab_1(self):
         self.tab1 = QWidget()
@@ -67,10 +73,13 @@ class MainWindow(QtWidgets.QWidget):
 
     @pyqtSlot()
     def tab1_response(self, action):
-        print(action)
+        assert action in self.supported_run_statuses
+        self.run_status = action
+        print(self.run_status)
 
 
     def setup_tab_2(self):
+        self.setup_tab_2_variables()
         self.tab2 = QWidget()
         self.horizontalLayout_tab2 = QHBoxLayout(self.tab2)
 
@@ -79,7 +88,7 @@ class MainWindow(QtWidgets.QWidget):
         self.left_vertical_layout = QVBoxLayout()
         self.OperandsGroupBox.setLayout(self.left_vertical_layout)
 
-        lr_label = QLabel("Current lr : {}".format(0.9912))
+        lr_label = QLabel("Current lr : {}".format(self.learning_rate))
         factor_label  = QLabel("Factor : ")
 
         textbox = QLineEdit()
@@ -89,7 +98,7 @@ class MainWindow(QtWidgets.QWidget):
         self.left_vertical_layout.addStretch(1)
         self.left_vertical_layout.addWidget(lr_label)
 
-        self.left_vertical_layout.addWidget(self.selected_operand)
+        self.left_vertical_layout.addWidget(self.selected_operandQLabel)
         self.left_vertical_layout.addWidget(factor_label)
         self.left_vertical_layout.addWidget(textbox)
 
@@ -123,8 +132,8 @@ class MainWindow(QtWidgets.QWidget):
     @pyqtSlot()
     def on_click(self, selected_operator='f(x)=x'):
         assert selected_operator in('+','-','/','*','f(x)=x')
-        self.selected_operand.setText('\t{}'.format(selected_operator))
-        print(self.selected_operand.text().strip())
+        self.selected_operandQLabel.setText('\t{}'.format(selected_operator))
+        print(self.selected_operandQLabel.text().strip())
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
