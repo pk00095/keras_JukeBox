@@ -140,7 +140,7 @@ class JukeBoxCallback(Callback):
                        'should be float.')
     if self.backend_learning_rate != self.frontend_learning_rate:
       if self.verbose > 0:
-        red_print('updated learning rate from {} to {}'.format(self.model.optimizer.lr, self.frontend_learning_rate))
+        red_print('updated learning rate from {} to {}'.format(self.backend_learning_rate, self.frontend_learning_rate))
       K.set_value(self.model.optimizer.lr, self.frontend_learning_rate)
 
     # recapture this learning rate to send to FrontEnd
