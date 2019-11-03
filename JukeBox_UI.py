@@ -41,6 +41,7 @@ class MainWindow(QtWidgets.QWidget):
     def setup_tab_2_variables(self, learning_rate=0.99, selected_operand='f(x)=x'):
         self.learning_rate = learning_rate
         self.selected_operandQLabel = QLabel('\t{}'.format(selected_operand))
+        print("tab2 variables set up")
 
     def setup_tab_1(self):
         self.tab1 = QWidget()
@@ -70,6 +71,7 @@ class MainWindow(QtWidgets.QWidget):
         self.horizontalLayout_tab1.addWidget(self.button_start)
         self.horizontalLayout_tab1.addWidget(self.button_pause)
         self.horizontalLayout_tab1.addWidget(self.button_stop)
+        print("tab1 set up")
 
     @pyqtSlot()
     def tab1_response(self, action):
@@ -128,6 +130,7 @@ class MainWindow(QtWidgets.QWidget):
         self.right_vertical_layout.addWidget( button3 )
         self.right_vertical_layout.addWidget( button4 )
         self.right_vertical_layout.addWidget( button5 )
+        print("tab2 set up")
 
     @pyqtSlot()
     def on_click(self, selected_operator='f(x)=x'):

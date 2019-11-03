@@ -1,33 +1,36 @@
 from tensorflow.keras.callbacks import Callback
 from tensorflow.keras import backend as K
-import threading
+import threading, sys
+import numpy as np
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from JukeBox_backend import App
+from .JukeBox_UI import App
 
-class LearningRateScheduler(Callback):
+class JukeBoxCallback(Callback):
 
   def __init__(self, verbose=0):
-    super(LearningRateScheduler, self).__init__()
+    super(JukeBoxCallback, self).__init__()
     self.verbose = verbose
 
     self.backend_learning_rate = 0
     self.frontend_learning_rate = 0
 
   def startUI(self):
-      sys.exit(self.app.exec_())
+    self.app = QtWidgets.QApplication(sys.argv)
+    self.ex = App()
+    self.app.exec_()
+    #sys.exit(self.app.exec_())
 
   def on_train_begin(self, logs):
     if not hasattr(self.model.optimizer, 'lr'):
       raise ValueError('Optimizer must have a "lr" attribute.')
 
-    self.app = QtWidgets.QApplication()
-    self.ex = App()
 
     self.UIthr = threading.Thread(target=self.startUI)
     self.UIthr.daemon = True
     self.UIthr.start()
+    #self.startUI()
 
     self.backend_learning_rate = float(K.get_value(self.model.optimizer.lr))
     #initialize this in GUI
@@ -38,11 +41,11 @@ class LearningRateScheduler(Callback):
 
     # if play has not been initiated, go into an infinite loop
     #run_status_displayed=False
-    if self.ex.window.run_status == 'pause':
-        print('Paused from Frontend')
-        while self.ex.window.run_status == 'pause':
-            pass
-        print('Resuming ..')
+    #if self.ex.window.run_status == 'pause':
+    #    print('Paused from Frontend')
+    #    while self.ex.window.run_status == 'pause':
+    #        pass
+    #    print('Resuming ..')
 
 
     if not hasattr(self.model.optimizer, 'lr'):
@@ -65,7 +68,7 @@ class LearningRateScheduler(Callback):
     self.ex.window.learning_rate = self.backend_learning_rate
 
     if self.verbose > 0:
-      print('\nEpoch %05d: LearningRateScheduler reducing learning '
+      print('\nEpoch %05d: JukeBox reducing learning '
             'rate to %s.' % (epoch + 1, lr))
 
   def on_epoch_end(self, epoch, logs=None):
