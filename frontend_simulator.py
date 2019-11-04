@@ -122,8 +122,28 @@ def main():
     sim.publish_data('keras_JukeBox/backend/199', payload=payload)
     print('sent play command')
 
-    #time.sleep(2000)
+    time.sleep(5)
 
+    #pause
+
+    payload = {
+    'tab1':{'play_status':'pause'},
+    'tab2':{'learning_rate':0.001}}
+
+    sim.publish_data('keras_JukeBox/backend/199', payload=payload)
+    print('sent play command')
+
+    time.sleep(6)
+
+    # play
+    payload = {
+    'tab1':{'play_status':'play'},
+    'tab2':{'learning_rate':0.0009}}
+
+    sim.publish_data('keras_JukeBox/backend/199', payload=payload)
+    print('sent play command')
+
+    time.sleep(5)
 
     #stop
 

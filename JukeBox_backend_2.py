@@ -20,6 +20,7 @@ class JukeBoxCallback(Callback):
 
     self.backend_learning_rate = 0
     self.frontend_learning_rate = 0
+    self.frontend_learning_rate_prev = 0
 
     self.host = host
     self.port = port
@@ -40,6 +41,8 @@ class JukeBoxCallback(Callback):
 
     self.current_epoch = 0
     self.current_batch = 0
+
+    self.update_learning_rate = False
 
     payload = {'PID':self.PID, 'status': 'not_started'}
     self.publish_data(payload)
@@ -95,6 +98,11 @@ class JukeBoxCallback(Callback):
     self.play_status = tab_1_cmd['play_status']
     self.frontend_learning_rate = tab_2_cmd['learning_rate']
 
+    if self.frontend_learning_rate != self.frontend_learning_rate_prev:
+    	self.update_learning_rate = True
+    	self.frontend_learning_rate_prev = self.frontend_learning_rate
+    #self.update_learning_rate = tab_2_cmd['update_learning_rate']
+
 
   def on_train_begin(self, logs):
 
@@ -138,10 +146,13 @@ class JukeBoxCallback(Callback):
     if not isinstance(self.frontend_learning_rate, (float, np.float32, np.float64)):
       raise ValueError('The output of the "schedule" function '
                        'should be float.')
-    if self.backend_learning_rate != self.frontend_learning_rate:
+    #if self.backend_learning_rate != self.frontend_learning_rate:
+    if self.update_learning_rate:
       if self.verbose > 0:
         red_print('updated learning rate from {} to {}'.format(self.backend_learning_rate, self.frontend_learning_rate))
       K.set_value(self.model.optimizer.lr, self.frontend_learning_rate)
+
+      self.update_learning_rate = False
 
     # recapture this learning rate to send to FrontEnd
     self.backend_learning_rate = float(K.get_value(self.model.optimizer.lr))
