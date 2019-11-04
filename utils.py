@@ -1,6 +1,6 @@
 import math
 
-def calculate_efffective_lr(initial_lr, operator, operand=None):
+def calculate_efffective_lr(initial_lr, operator, operand):
 	if operator == '*':
 		assert operand!=None and operand>0,'operand cannot be negative or None'
 		return initial_lr*operand
@@ -16,5 +16,7 @@ def calculate_efffective_lr(initial_lr, operator, operand=None):
 		return initial_lr-operand 
 	else:
 		if operator != 'f(x)':
+			return operand
+		else:
 			print('unsupported operand {}, retrning f(x)=x'.format(operator))
-		return initial_lr
+			return initial_lr

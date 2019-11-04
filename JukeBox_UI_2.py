@@ -106,7 +106,7 @@ class MainWindow(QtWidgets.QWidget):
     def on_message(self,client, userdata, msg):
 
         message = json.loads(msg.payload.decode('utf-8'))
-        print(message)
+        #print(message)
 
         if self.PID == None: #not yet got any backend
             #assign itself a PID
@@ -249,15 +249,22 @@ class MainWindow(QtWidgets.QWidget):
         self.selected_operandQLabel.setText('\t{}'.format(selected_operator))
         print(self.selected_operandQLabel.text().strip())
 
-        eff_lr =calculate_efffective_lr(
-            initial_lr=self.learning_rate, 
-            operator=self.selected_operandQLabel.text().strip(), 
-            operand=float(self.operand_textbox.text()))
+        operand = self.operand_textbox.text()
 
-        self.tab2_payload = {'learning_rate':eff_lr}
-        # calculate effective learning rate and publish to backend
-        print(self.tab2_payload)
-        self.send_payload()
+        if operand == '':
+            print('no command send since operand field was empty')
+
+        else:
+
+            eff_lr =calculate_efffective_lr(
+                initial_lr=self.learning_rate, 
+                operator=self.selected_operandQLabel.text().strip(), 
+                operand=float(operand))
+
+            self.tab2_payload = {'learning_rate':eff_lr}
+            # calculate effective learning rate and publish to backend
+            print(self.tab2_payload)
+            self.send_payload()
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
