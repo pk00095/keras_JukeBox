@@ -9,7 +9,7 @@ import paho.mqtt.client as mqtt
 
 from PyQt5.QtCore import pyqtSlot
 
-from utils import calculate_efffective_lr
+from utils import calculate_efffective_lr, FloatNotEmptyValidator
 
 def red_print(text):
     print('\033[31m{}\033[0m'.format(text))
@@ -82,10 +82,13 @@ class MainWindow(QtWidgets.QWidget):
             self.client.loop(timeout=1.0, max_packets=1)
 
 
-    def publish_data(self, payload, qos=0, retain=True):
+    def publish_data(self, payload=None, qos=0, retain=True):
         if isinstance(payload, dict):
           payload = json.dumps(payload, indent=2)
           self.client.publish(self.publish_topic, payload=payload, qos=qos, retain=retain)
+        elif payload==None:
+            self.client.publish(self.publish_topic, payload=payload, qos=1, retain=True)
+            red_print("cleared all meassages under topic name {}".format(self.publish_topic))
         else:
           red_print("payload was not dictionary, did not send")
 
@@ -112,10 +115,18 @@ class MainWindow(QtWidgets.QWidget):
             #assign itself a PID
             if message['status'] == 'not_started':
                 self.PID = message['PID']
+
+                # clear messages under the topic name 'keras_JukeBox/frontend/'
+                self.publish_topic = 'keras_JukeBox/frontend/{}'.format(self.PID)
+                payload = None
+                self.publish_data(payload)
+
                 self.publish_topic = 'keras_JukeBox/backend/{}'.format(self.PID)
                 payload = {'status':'acknowledged'}
                 self.publish_data(payload)
                 print('subscribed to PID :: {}'.format(self.PID))
+
+
 
                 # TO DO unsubscribe from previous topic
                 self.client.unsubscribe(self.subscribe_topic)
@@ -186,6 +197,9 @@ class MainWindow(QtWidgets.QWidget):
 
         self.send_payload()
 
+        if self.run_status == 'stop':
+            self.publish_data(payload=None)
+
 
 
     def setup_tab_2(self):
@@ -204,6 +218,7 @@ class MainWindow(QtWidgets.QWidget):
         self.operand_textbox = QLineEdit()
         self.operand_textbox.setText(str(self.initial_operand_value))
         self.onlyFloatValidator = QtGui.QDoubleValidator()
+        #self.onlyFloatValidator = FloatNotEmptyValidator()
         self.operand_textbox.setValidator(self.onlyFloatValidator)
 
         self.left_vertical_layout.addStretch(1)

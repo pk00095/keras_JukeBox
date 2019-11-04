@@ -1,5 +1,12 @@
 import math
 
+from PyQt5 import QtGui, QtWidgets
+
+class FloatNotEmptyValidator(QtGui.QValidator):
+    def validate(self, text, pos):
+        state = QtGui.QIntValidator.Acceptable if float(text) else QtGui.QIntValidator.Invalid
+        return state, text, pos
+
 def calculate_efffective_lr(initial_lr, operator, operand):
 	if operator == '*':
 		assert operand!=None and operand>0,'operand cannot be negative or None'

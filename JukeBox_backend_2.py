@@ -63,10 +63,13 @@ class JukeBoxCallback(Callback):
       #payload = {'PID':self.PID, 'status': 'not_started'}
       #self.publish_data(payload)
 
-  def publish_data(self, payload, qos=0, retain=True):
+  def publish_data(self, payload=None, qos=0, retain=True):
     if isinstance(payload, dict):
       payload = json.dumps(payload, indent=2)
       self.client.publish(self.publish_topic, payload=payload, qos=qos, retain=retain)
+    elif payload==None:
+        self.client.publish(self.publish_topic, payload=payload, qos=1, retain=True)
+        red_print("cleared all meassages under topic name {}".format(self.publish_topic))
     else:
       red_print("payload was not dictionary, did not send")
 
@@ -97,14 +100,14 @@ class JukeBoxCallback(Callback):
     tab_2_cmd = self.msg['tab2']
 
     if tab_1_cmd['play_status'] in ['play', 'pause', 'stop']:
-    	self.play_status = tab_1_cmd['play_status']
-    	self.frontend_learning_rate = tab_2_cmd['learning_rate']
+        self.play_status = tab_1_cmd['play_status']
+        self.frontend_learning_rate = tab_2_cmd['learning_rate']
     else:
-    	red_print("Play command '{}' in not supported so rejected whole message, retaining previous command '{}'".format(tab_1_cmd['play_status'],self.play_status))
+        red_print("Play command '{}' in not supported so rejected whole message, retaining previous command '{}'".format(tab_1_cmd['play_status'],self.play_status))
 
     if self.frontend_learning_rate != self.frontend_learning_rate_prev:
-    	self.update_learning_rate = True
-    	self.frontend_learning_rate_prev = self.frontend_learning_rate
+        self.update_learning_rate = True
+        self.frontend_learning_rate_prev = self.frontend_learning_rate
     #self.update_learning_rate = tab_2_cmd['update_learning_rate']
 
 
@@ -135,11 +138,11 @@ class JukeBoxCallback(Callback):
     if self.play_status in ['pause', 'stop']:
 
       if self.play_status == 'pause':
-      	red_print('paused from frontend')
+        red_print('paused from frontend')
 
       if self.play_status == 'stop':
-      	self.stopped_from_frontend = True
-      	self.model.stop_training = True
+        self.stopped_from_frontend = True
+        self.model.stop_training = True
 
       while self.play_status =='pause':
         pass
@@ -186,7 +189,9 @@ class JukeBoxCallback(Callback):
     self.current_epoch = epoch+1
 
   def on_train_end(self, logs):
-  	if self.stopped_from_frontend:
-  		red_print("training stopped from JukeBox")
-  	else:
-  		red_print("training complete, terminated naturally")
+    if self.stopped_from_frontend:
+        red_print("training stopped from JukeBox")
+    else:
+        red_print("training complete, terminated naturally")
+
+    self.publish_data(payload=None)
