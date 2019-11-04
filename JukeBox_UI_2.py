@@ -39,6 +39,13 @@ class MainWindow(QtWidgets.QWidget):
         self.current_epoch = 0
         self.current_batch = 0
 
+        self.current_epoch_label_tab2 = QLabel("Current Epoch : {}".format(self.current_epoch))
+        self.current_batch_label_tab2 = QLabel("Current Batch : {}".format(self.current_batch))
+
+        self.current_epoch_label_tab1 = QLabel("Current Epoch : {}".format(self.current_epoch))
+        self.current_batch_label_tab1 = QLabel("Current Batch : {}".format(self.current_batch))
+
+
         # Run this after settings
         # Initialize tabs
         tab_holder = QtWidgets.QTabWidget()   # Create tab holder
@@ -141,7 +148,11 @@ class MainWindow(QtWidgets.QWidget):
             self.current_epoch = message['epoch']
             self.current_batch = message['batch']
 
+            self.current_epoch_label_tab2.setText("Current Epoch : {}".format(self.current_epoch))
+            self.current_batch_label_tab2.setText("Current Batch : {}".format(self.current_batch))
 
+            self.current_epoch_label_tab1.setText("Current Epoch : {}".format(self.current_epoch))
+            self.current_batch_label_tab1.setText("Current Batch : {}".format(self.current_batch))
 
 
     def setup_tab_2_variables(self, learning_rate=0.99, selected_operand='f(x)=x'):
@@ -178,6 +189,10 @@ class MainWindow(QtWidgets.QWidget):
         self.button_pause.setToolTip("Pause Training")    # Message to show when mouse hover
         self.button_pause.clicked.connect(lambda : self.tab1_response(action='pause'))
 
+
+        self.horizontalLayout_tab1.addWidget(self.current_epoch_label_tab1)
+        self.horizontalLayout_tab1.addWidget(self.current_batch_label_tab1)
+
         self.horizontalLayout_tab1.addWidget(self.button_start)
         self.horizontalLayout_tab1.addWidget(self.button_pause)
         self.horizontalLayout_tab1.addWidget(self.button_stop)
@@ -197,6 +212,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.send_payload()
 
+        # if command is stop clear all reatined messages under 'keras_JukeBox/backend/PID'
         if self.run_status == 'stop':
             self.publish_data(payload=None)
 
@@ -220,6 +236,9 @@ class MainWindow(QtWidgets.QWidget):
         self.onlyFloatValidator = QtGui.QDoubleValidator()
         #self.onlyFloatValidator = FloatNotEmptyValidator()
         self.operand_textbox.setValidator(self.onlyFloatValidator)
+
+        self.left_vertical_layout.addWidget(self.current_epoch_label_tab2)
+        self.left_vertical_layout.addWidget(self.current_batch_label_tab2)
 
         self.left_vertical_layout.addStretch(1)
         self.left_vertical_layout.addWidget(self.lr_label)
