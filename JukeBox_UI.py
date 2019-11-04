@@ -26,6 +26,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.run_status = 'pause'      
         self.supported_run_statuses = ['play','pause','stop']
+        self.initial_operand_value = 1e-5
 
         # Run this after settings
         # Initialize tabs
@@ -93,16 +94,17 @@ class MainWindow(QtWidgets.QWidget):
         lr_label = QLabel("Current lr : {}".format(self.learning_rate))
         factor_label  = QLabel("Factor : ")
 
-        textbox = QLineEdit()
+        self.operand_textbox = QLineEdit()
+        self.operand_textbox.setText(str(self.initial_operand_value))
         self.onlyFloatValidator = QtGui.QDoubleValidator()
-        textbox.setValidator(self.onlyFloatValidator)
+        self.operand_textbox.setValidator(self.onlyFloatValidator)
 
         self.left_vertical_layout.addStretch(1)
         self.left_vertical_layout.addWidget(lr_label)
 
         self.left_vertical_layout.addWidget(self.selected_operandQLabel)
         self.left_vertical_layout.addWidget(factor_label)
-        self.left_vertical_layout.addWidget(textbox)
+        self.left_vertical_layout.addWidget(self.operand_textbox)
 
         self.OperatorsGroupBox = QGroupBox( "Operators" )
         self.horizontalLayout_tab2.addWidget( self.OperatorsGroupBox )
@@ -137,6 +139,7 @@ class MainWindow(QtWidgets.QWidget):
         assert selected_operator in('+','-','/','*','f(x)=x')
         self.selected_operandQLabel.setText('\t{}'.format(selected_operator))
         print(self.selected_operandQLabel.text().strip())
+        print(self.operand_textbox.text(), type(self.operand_textbox.text()))
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

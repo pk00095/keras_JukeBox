@@ -9,6 +9,8 @@ import paho.mqtt.client as mqtt
 
 from PyQt5.QtCore import pyqtSlot
 
+from utils import calculate_efffective_lr
+
 def red_print(text):
     print('\033[31m{}\033[0m'.format(text))
 
@@ -31,6 +33,11 @@ class MainWindow(QtWidgets.QWidget):
 
         self.run_status = 'pause'      
         self.supported_run_statuses = ['play','pause','stop']
+        self.initial_operand_value = 1e-5
+
+
+        self.current_epoch = 0
+        self.current_batch = 0
 
         # Run this after settings
         # Initialize tabs
@@ -58,8 +65,7 @@ class MainWindow(QtWidgets.QWidget):
         self.PID = None
         self.client.subscribe(self.subscribe_topic)
         print("INit done")
-        #payload = {'status':'acknowledged'}
-        #self.publish_data(payload)
+
         self.running = False
 
         thr = threading.Thread(target=self.start_listening)
@@ -69,6 +75,8 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def start_listening(self):
+
+        print('started listening')
         self.running = True
         while self.running:
             self.client.loop(timeout=1.0, max_packets=1)
@@ -80,6 +88,13 @@ class MainWindow(QtWidgets.QWidget):
           self.client.publish(self.publish_topic, payload=payload, qos=qos, retain=retain)
         else:
           red_print("payload was not dictionary, did not send")
+
+    def send_payload(self):
+        payload = {
+        'tab1':self.tab1_payload,
+        'tab2':self.tab2_payload
+        }
+        self.publish_data(payload)
 
 
     def on_connect(self, client, userdata, flags, rc):
@@ -100,16 +115,28 @@ class MainWindow(QtWidgets.QWidget):
                 self.publish_topic = 'keras_JukeBox/backend/{}'.format(self.PID)
                 payload = {'status':'acknowledged'}
                 self.publish_data(payload)
+                print('subscribed to PID :: {}'.format(self.PID))
 
                 # TO DO unsubscribe from previous topic
                 self.client.unsubscribe(self.subscribe_topic)
                 self.subscribe_topic = 'keras_JukeBox/frontend/{}'.format(self.PID)
                 self.client.subscribe(self.subscribe_topic)
 
+        else:
+            self.learning_rate = message['learning_rate']
+            self.current_epoch = message['epoch']
+            self.current_batch = message['batch']
+
+
+
 
     def setup_tab_2_variables(self, learning_rate=0.99, selected_operand='f(x)=x'):
         self.learning_rate = learning_rate
         self.selected_operandQLabel = QLabel('\t{}'.format(selected_operand))
+
+        # initial value of payload['tab1'] to be sent on connect
+        self.tab2_payload = {'learning_rate':0.001}
+
         print("tab2 variables set up")
 
     def setup_tab_1(self):
@@ -140,6 +167,10 @@ class MainWindow(QtWidgets.QWidget):
         self.horizontalLayout_tab1.addWidget(self.button_start)
         self.horizontalLayout_tab1.addWidget(self.button_pause)
         self.horizontalLayout_tab1.addWidget(self.button_stop)
+
+        # initial value of payload['tab1'] to be sent on connect
+        self.tab1_payload = {'play_status':self.run_status}
+
         print("tab1 set up")
 
     @pyqtSlot()
@@ -147,6 +178,11 @@ class MainWindow(QtWidgets.QWidget):
         assert action in self.supported_run_statuses
         self.run_status = action
         print(self.run_status)
+        self.tab1_payload = {'play_status':self.run_status}
+        #publish to frontend
+
+        self.send_payload()
+
 
 
     def setup_tab_2(self):
@@ -162,16 +198,17 @@ class MainWindow(QtWidgets.QWidget):
         lr_label = QLabel("Current lr : {}".format(self.learning_rate))
         factor_label  = QLabel("Factor : ")
 
-        textbox = QLineEdit()
+        self.operand_textbox = QLineEdit()
+        self.operand_textbox.setText(str(self.initial_operand_value))
         self.onlyFloatValidator = QtGui.QDoubleValidator()
-        textbox.setValidator(self.onlyFloatValidator)
+        self.operand_textbox.setValidator(self.onlyFloatValidator)
 
         self.left_vertical_layout.addStretch(1)
         self.left_vertical_layout.addWidget(lr_label)
 
         self.left_vertical_layout.addWidget(self.selected_operandQLabel)
         self.left_vertical_layout.addWidget(factor_label)
-        self.left_vertical_layout.addWidget(textbox)
+        self.left_vertical_layout.addWidget(self.operand_textbox)
 
         self.OperatorsGroupBox = QGroupBox( "Operators" )
         self.horizontalLayout_tab2.addWidget( self.OperatorsGroupBox )
@@ -199,6 +236,8 @@ class MainWindow(QtWidgets.QWidget):
         self.right_vertical_layout.addWidget( button3 )
         self.right_vertical_layout.addWidget( button4 )
         self.right_vertical_layout.addWidget( button5 )
+
+
         print("tab2 set up")
 
     @pyqtSlot()
@@ -206,6 +245,16 @@ class MainWindow(QtWidgets.QWidget):
         assert selected_operator in('+','-','/','*','f(x)=x')
         self.selected_operandQLabel.setText('\t{}'.format(selected_operator))
         print(self.selected_operandQLabel.text().strip())
+
+        eff_lr =calculate_efffective_lr(
+            initial_lr=self.learning_rate, 
+            operator=self.selected_operandQLabel.text().strip(), 
+            operand=float(self.operand_textbox.text()))
+
+        self.tab2_payload = {'learning_rate':eff_lr}
+        # calculate effective learning rate and publish to backend
+        print(self.tab2_payload)
+        self.send_payload()
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
