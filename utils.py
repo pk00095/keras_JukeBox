@@ -2,6 +2,31 @@ import math
 
 from PyQt5 import QtGui, QtWidgets
 
+def black_print(text):
+    print('\033[30m{}\033[0m'.format(text))
+
+def red_print(text):
+    print('\033[31m{}\033[0m'.format(text))
+
+def green_print(text):
+    print('\033[32m{}\033[0m'.format(text))
+
+def yellow_print(text):
+    print('\033[33m{}\033[0m'.format(text))
+
+def blue_print(text):
+    print('\033[34m{}\033[0m'.format(text))
+
+def magenta_print(text):
+    print('\033[35m{}\033[0m'.format(text))
+
+def cyan_print(text):
+    print('\033[36m{}\033[0m'.format(text))
+
+def gray_print(text):
+    print('\033[90m{}\033[0m'.format(text))
+    
+
 class FloatNotEmptyValidator(QtGui.QValidator):
     def validate(self, text, pos):
         state = QtGui.QIntValidator.Acceptable if float(text) else QtGui.QIntValidator.Invalid
