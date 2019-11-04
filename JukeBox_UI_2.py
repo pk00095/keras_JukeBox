@@ -124,6 +124,9 @@ class MainWindow(QtWidgets.QWidget):
 
         else:
             self.learning_rate = message['learning_rate']
+            self.lr_label.setText(str(self.learning_rate))
+            #self.lr_label = QLabel("Current lr : {}".format(self.learning_rate))
+
             self.current_epoch = message['epoch']
             self.current_batch = message['batch']
 
@@ -195,7 +198,7 @@ class MainWindow(QtWidgets.QWidget):
         self.left_vertical_layout = QVBoxLayout()
         self.OperandsGroupBox.setLayout(self.left_vertical_layout)
 
-        lr_label = QLabel("Current lr : {}".format(self.learning_rate))
+        self.lr_label = QLabel("Current lr : {}".format(self.learning_rate))
         factor_label  = QLabel("Factor : ")
 
         self.operand_textbox = QLineEdit()
@@ -204,7 +207,7 @@ class MainWindow(QtWidgets.QWidget):
         self.operand_textbox.setValidator(self.onlyFloatValidator)
 
         self.left_vertical_layout.addStretch(1)
-        self.left_vertical_layout.addWidget(lr_label)
+        self.left_vertical_layout.addWidget(self.lr_label)
 
         self.left_vertical_layout.addWidget(self.selected_operandQLabel)
         self.left_vertical_layout.addWidget(factor_label)
