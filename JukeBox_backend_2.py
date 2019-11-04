@@ -38,6 +38,7 @@ class JukeBoxCallback(Callback):
     self.client.subscribe(self.subscribe_topic)
 
     self.play_status = 'pause'
+    self.stopped_from_frontend = False
 
     self.current_epoch = 0
     self.current_batch = 0
@@ -95,8 +96,11 @@ class JukeBoxCallback(Callback):
     tab_1_cmd = self.msg['tab1']
     tab_2_cmd = self.msg['tab2']
 
-    self.play_status = tab_1_cmd['play_status']
-    self.frontend_learning_rate = tab_2_cmd['learning_rate']
+    if tab_1_cmd['play_status'] in ['play', 'pause', 'stop']:
+    	self.play_status = tab_1_cmd['play_status']
+    	self.frontend_learning_rate = tab_2_cmd['learning_rate']
+    else:
+    	red_print("Play command '{}' in not supported so rejected whole message, retaining previous command '{}'".format(tab_1_cmd['play_status'],self.play_status))
 
     if self.frontend_learning_rate != self.frontend_learning_rate_prev:
     	self.update_learning_rate = True
@@ -128,9 +132,16 @@ class JukeBoxCallback(Callback):
 
     # if play has not been initiated, go into an infinite loop
     #run_status_displayed=False
-    if self.play_status in ['pause']:
-      red_print('paused from frontend')
-      while self.play_status in ['pause','not_started']:
+    if self.play_status in ['pause', 'stop']:
+
+      if self.play_status == 'pause':
+      	red_print('paused from frontend')
+
+      if self.play_status == 'stop':
+      	self.stopped_from_frontend = True
+      	self.model.stop_training = True
+
+      while self.play_status =='pause':
         pass
       red_print('Resuming ..')
 
@@ -173,3 +184,9 @@ class JukeBoxCallback(Callback):
     logs = logs or {}
     logs['lr'] = K.get_value(self.model.optimizer.lr)
     self.current_epoch = epoch+1
+
+  def on_train_end(self, logs):
+  	if self.stopped_from_frontend:
+  		red_print("training stopped from JukeBox")
+  	else:
+  		red_print("training complete, terminated naturally")

@@ -145,7 +145,23 @@ def main():
 
     time.sleep(5)
 
+    # test illegal play command
+    payload = {
+    'tab1':{'play_status':'fake'},
+    'tab2':{'learning_rate':0.0009}}
+
+    sim.publish_data('keras_JukeBox/backend/199', payload=payload)
+    print('sent play command')
+
+    time.sleep(5)
     #stop
+
+    payload = {
+    'tab1':{'play_status':'stop'},
+    'tab2':{'learning_rate':0.0009}}
+
+    sim.publish_data('keras_JukeBox/backend/199', payload=payload)
+    print('sent play command')
 
 if __name__ == '__main__':
     main()
