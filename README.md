@@ -27,9 +27,12 @@ sudo apt-get install mosquitto-clients
 
 Python dependencies:
 
-* python-3.6.8 or greater
+* python >= 3.6.8
 * paho-mqtt
 * PyQt5
+* tensorflow >= 1.14
+
+**Note: This package is intended and tested for tensorflow-keras api and NOT keras with tensorflow 'backend'**
 
 # Usage
 
