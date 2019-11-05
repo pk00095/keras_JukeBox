@@ -27,6 +27,7 @@ sudo apt-get install mosquitto-clients
 
 Python dependencies:
 
+* python-3.6.8 or greater
 * paho-mqtt
 * PyQt5
 
