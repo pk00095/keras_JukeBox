@@ -166,14 +166,14 @@ class MainWindow(QtWidgets.QWidget):
         self.tab1 = QWidget()
         self.horizontalLayout_tab1 = QHBoxLayout(self.tab1)
 
-        self.button_start = QtWidgets.QPushButton('') #self.lang["btn_start"])
+        self.button_start = QtWidgets.QPushButton('play') #self.lang["btn_start"])
         self.button_start.setIcon(QtGui.QIcon('keras_jukebox/images/play.png'))
         #self.button_start.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_start.setToolTip("Start Training")    # Message to show when mouse hover
         self.button_start.clicked.connect(lambda : self.tab1_response(action='play'))
 
 
-        self.button_stop = QtWidgets.QPushButton('') #self.lang["btn_stop"])
+        self.button_stop = QtWidgets.QPushButton('stop') #self.lang["btn_stop"])
         self.button_stop.setIcon(QtGui.QIcon('keras_jukebox/images/stop.png'))
         #self.button_stop.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_stop.setToolTip("Stop Training")    # Message to show when mouse hover
@@ -181,7 +181,7 @@ class MainWindow(QtWidgets.QWidget):
 
 
 
-        self.button_pause = QtWidgets.QPushButton('')
+        self.button_pause = QtWidgets.QPushButton('pause')
         self.button_pause.setIcon(QtGui.QIcon('keras_jukebox/images/pause.png'))
         #self.button_pause.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_pause.setToolTip("Pause Training")    # Message to show when mouse hover
@@ -304,7 +304,7 @@ def main():
     print('App Init Done.')
     sys.exit(app.exec_())
     print('Done')
-    
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     ex = App()
