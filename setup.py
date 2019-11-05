@@ -16,6 +16,10 @@ setuptools.setup(
 	url="https://github.com/pk00095/keras_JukeBox.git",
 	packages=setuptools.find_packages(),
 	install_requires=['PyQt5','paho-mqtt'],
+	entry_points={
+		"console_scripts": [
+			'start_JukeBox=keras_jukebox.JukeBox_UI_2:main']
+	},
 	classifiers=[
 		"Programming Language :: Python :: 3",
 		"License :: OSI Approved :: MIT License",

@@ -298,6 +298,13 @@ class MainWindow(QtWidgets.QWidget):
             print(self.tab2_payload)
             self.send_payload()
 
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    ex = App()
+    print('App Init Done.')
+    sys.exit(app.exec_())
+    print('Done')
+    
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     ex = App()
