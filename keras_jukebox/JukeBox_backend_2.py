@@ -7,8 +7,8 @@ import paho.mqtt.client as mqtt
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-def red_print(text):
-    print('\033[31m{}\033[0m'.format(text))
+from keras_jukebox.utils import red_print
+
 
 class JukeBoxCallback(Callback):
 
