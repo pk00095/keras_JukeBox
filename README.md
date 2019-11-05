@@ -1,3 +1,7 @@
+# Acknowledgement
+  
+This project is supported by [Segmind](https://segmind.com)
+
 # keras JukeBox
 
 This is a UI based hyper-parameter controller, which let's you control the following.
@@ -6,6 +10,25 @@ This is a UI based hyper-parameter controller, which let's you control the follo
 * reset the learning rate on dynamically while training is in progress.
 
 more functionalities are to be added
+
+# Dependencies
+
+This package depends on **MQTT** protocol for communication. So, it is expected that an MQTT broker is up and running in 'localhost' at port 1883(default port).
+
+Install it by :
+
+```
+
+sudo apt-get update
+sudo apt-get install mosquitto
+sudo apt-get install mosquitto-clients
+
+```
+
+Python dependencies:
+
+* paho-mqtt
+* PyQt5
 
 # Usage
 
@@ -27,7 +50,8 @@ model.fit(train_images, train_labels, epochs=20, callbacks=[JukeBoxCallback(verb
 
 ```
 
-then in a separate terminal, type:
+and run your training script. You will note that the script gets blocked, this is because it is waiting for a JukeBox UI to capture it's session. 
+Now, in a separate terminal, type:
 
 ```
 
