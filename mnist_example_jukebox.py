@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import tensorflow as tf
 from tensorflow import keras
 
-from keras_jukebox.JukeBox_backend_2 import JukeBoxCallback
+from keras_jukebox import JukeBoxCallback
 
 
 import numpy as np
