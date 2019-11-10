@@ -184,6 +184,7 @@ class MainWindow(QtWidgets.QWidget):
         #self.button_stop.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_stop.setToolTip("Stop Training")    # Message to show when mouse hover
         self.button_stop.clicked.connect(lambda : self.tab1_response(action='stop'))
+        self.button_stop.setEnabled(False)
 
 
 
@@ -193,6 +194,7 @@ class MainWindow(QtWidgets.QWidget):
         #self.button_pause.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_pause.setToolTip("Pause Training")    # Message to show when mouse hover
         self.button_pause.clicked.connect(lambda : self.tab1_response(action='pause'))
+        self.button_pause.setEnabled(False)
 
 
         self.horizontalLayout_tab1.addWidget(self.current_epoch_label_tab1)
@@ -213,8 +215,35 @@ class MainWindow(QtWidgets.QWidget):
         self.run_status = action
         #green_print(self.run_status)
         self.tab1_payload = {'play_status':self.run_status}
-        #publish to frontend
 
+        # Enable one button at at time
+        if self.run_status == 'play':
+            # when play button is clicked, disable play button
+            self.button_start.setEnabled(False)
+            self.button_stop.setEnabled(True)
+            self.button_pause.setEnabled(True)
+
+        if self.run_status == 'pause':
+            # when pause button is clicked, disable pause button
+            self.button_start.setEnabled(True)
+            self.button_stop.setEnabled(True)
+            self.button_pause.setEnabled(False)
+
+        if self.run_status == 'stop':
+            # when stop is clicked disable all
+            self.button_start.setEnabled(False)
+            self.button_stop.setEnabled(False)
+            self.button_pause.setEnabled(False)
+
+            # Disable all buttons in tab2
+            self.tab2_button1.setEnabled(False)
+            self.tab2_button2.setEnabled(False)
+            self.tab2_button3.setEnabled(False)
+            self.tab2_button4.setEnabled(False)
+            self.tab2_button5.setEnabled(False)
+
+
+        #publish to frontend
         self.send_payload()
 
         # if command is stop clear all reatined messages under 'keras_JukeBox/backend/PID'
@@ -257,27 +286,27 @@ class MainWindow(QtWidgets.QWidget):
 
         self.right_vertical_layout = QVBoxLayout()
         self.OperatorsGroupBox.setLayout( self.right_vertical_layout )
-        button1 = QPushButton( '+' )
-        button1.clicked.connect(lambda: self.on_click('+'))
+        self.tab2_button1 = QPushButton( '+' )
+        self.tab2_button1.clicked.connect(lambda: self.on_click('+'))
 
-        button2 = QPushButton( '-' )
-        button2.clicked.connect(lambda: self.on_click('-'))
+        self.tab2_button2 = QPushButton( '-' )
+        self.tab2_button2.clicked.connect(lambda: self.on_click('-'))
 
-        button3 = QPushButton( '*' )
-        button3.clicked.connect(lambda: self.on_click('*'))
+        self.tab2_button3 = QPushButton( '*' )
+        self.tab2_button3.clicked.connect(lambda: self.on_click('*'))
 
-        button4 = QPushButton( '/' )
-        button4.clicked.connect(lambda: self.on_click('/'))
+        self.tab2_button4 = QPushButton( '/' )
+        self.tab2_button4.clicked.connect(lambda: self.on_click('/'))
 
-        button5 = QPushButton( 'f(x)=x' )
-        button5.clicked.connect(lambda: self.on_click('f(x)=x'))
+        self.tab2_button5 = QPushButton( 'f(x)=x' )
+        self.tab2_button5.clicked.connect(lambda: self.on_click('f(x)=x'))
 
         self.right_vertical_layout.addStretch(1)
-        self.right_vertical_layout.addWidget( button1 )
-        self.right_vertical_layout.addWidget( button2 )
-        self.right_vertical_layout.addWidget( button3 )
-        self.right_vertical_layout.addWidget( button4 )
-        self.right_vertical_layout.addWidget( button5 )
+        self.right_vertical_layout.addWidget( self.tab2_button1 )
+        self.right_vertical_layout.addWidget( self.tab2_button2 )
+        self.right_vertical_layout.addWidget( self.tab2_button3 )
+        self.right_vertical_layout.addWidget( self.tab2_button4 )
+        self.right_vertical_layout.addWidget( self.tab2_button5 )
 
 
         #green_print("tab2 set up")
