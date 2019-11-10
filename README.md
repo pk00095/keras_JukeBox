@@ -40,7 +40,7 @@ import as
 
 ```
 
-from keras_JukeBox import JukeBoxCallback
+from keras_jukebox import JukeBoxCallback
 
 ```
 
