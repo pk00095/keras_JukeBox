@@ -18,7 +18,7 @@ setuptools.setup(
 	install_requires=['PyQt5','paho-mqtt'],
 	entry_points={
 		"console_scripts": [
-			'start_JukeBox=keras_jukebox.JukeBox_UI_2:main']
+			'start_jukebox=keras_jukebox.jukebox_ui:main']
 	},
 	include_package_data=True,
 	classifiers=[

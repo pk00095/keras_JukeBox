@@ -1,4 +1,4 @@
-import sys, json, threading
+import sys, json, threading, pkg_resources
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton,
@@ -11,6 +11,10 @@ from PyQt5.QtCore import pyqtSlot
 
 from keras_jukebox.utils import calculate_efffective_lr, FloatNotEmptyValidator, red_print
 
+
+play_logo_path = pkg_resources.resource_filename('keras_jukebox', 'images/play.png')
+pause_logo_path = pkg_resources.resource_filename('keras_jukebox', 'images/pause.png')
+stop_logo_path = pkg_resources.resource_filename('keras_jukebox', 'images/stop.png')
 
 class App(QtWidgets.QMainWindow):
     def __init__(self):
@@ -167,14 +171,14 @@ class MainWindow(QtWidgets.QWidget):
         self.horizontalLayout_tab1 = QHBoxLayout(self.tab1)
 
         self.button_start = QtWidgets.QPushButton('play') #self.lang["btn_start"])
-        self.button_start.setIcon(QtGui.QIcon('keras_jukebox/images/play.png'))
+        self.button_start.setIcon(QtGui.QIcon(play_logo_path))
         #self.button_start.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_start.setToolTip("Start Training")    # Message to show when mouse hover
         self.button_start.clicked.connect(lambda : self.tab1_response(action='play'))
 
 
         self.button_stop = QtWidgets.QPushButton('stop') #self.lang["btn_stop"])
-        self.button_stop.setIcon(QtGui.QIcon('keras_jukebox/images/stop.png'))
+        self.button_stop.setIcon(QtGui.QIcon(stop_logo_path))
         #self.button_stop.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_stop.setToolTip("Stop Training")    # Message to show when mouse hover
         self.button_stop.clicked.connect(lambda : self.tab1_response(action='stop'))
@@ -182,7 +186,7 @@ class MainWindow(QtWidgets.QWidget):
 
 
         self.button_pause = QtWidgets.QPushButton('pause')
-        self.button_pause.setIcon(QtGui.QIcon('keras_jukebox/images/pause.png'))
+        self.button_pause.setIcon(QtGui.QIcon(pause_logo_path))
         #self.button_pause.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_pause.setToolTip("Pause Training")    # Message to show when mouse hover
         self.button_pause.clicked.connect(lambda : self.tab1_response(action='pause'))
