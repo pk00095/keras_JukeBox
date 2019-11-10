@@ -3,7 +3,7 @@ import sys, json, threading, pkg_resources
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton,
                              QHBoxLayout, QGroupBox, QVBoxLayout, QLineEdit,
-                             QLabel, QFormLayout)
+                             QLabel, QFormLayout, QComboBox)
 
 import paho.mqtt.client as mqtt
 
@@ -53,9 +53,11 @@ class MainWindow(QtWidgets.QWidget):
         tab_holder = QtWidgets.QTabWidget()   # Create tab holder
         self.setup_tab_1() 
         self.setup_tab_2()          # Tab one
+        self.setup_tab_3()
         # Add tabs
-        tab_holder.addTab(self.tab1,"Tab 1") #self.lang["tab_1_title"]) # Add "tab1" to the tabs holder "tabs"
-        tab_holder.addTab(self.tab2,"Tab 2") #self.lang["tab_2_title"]) # Add "tab2" to the tabs holder "tabs" 
+        tab_holder.addTab(self.tab1, "Tab 1") #self.lang["tab_1_title"]) # Add "tab1" to the tabs holder "tabs"
+        tab_holder.addTab(self.tab2, "Tab 2") #self.lang["tab_2_title"]) # Add "tab2" to the tabs holder "tabs"
+        tab_holder.addTab(self.tab3, "Tab 3") 
 
         layout.addWidget(tab_holder)
 
@@ -156,15 +158,6 @@ class MainWindow(QtWidgets.QWidget):
             self.current_batch_label_tab1.setText("Current Batch : {}".format(self.current_batch))
 
 
-    def setup_tab_2_variables(self, learning_rate=0.99, selected_operand='f(x)=x'):
-        self.learning_rate = learning_rate
-        self.selected_operandQLabel = QLabel('\t{}'.format(selected_operand))
-
-        # initial value of payload['tab1'] to be sent on connect
-        self.tab2_payload = {'learning_rate':0.001}
-
-        #green_print("tab2 variables set up")
-
     def setup_tab_1(self):
         self.tab1 = QWidget()
         self.horizontalLayout_tab1 = QHBoxLayout(self.tab1)
@@ -251,6 +244,15 @@ class MainWindow(QtWidgets.QWidget):
             self.publish_data(payload=None)
 
 
+    def setup_tab_2_variables(self, learning_rate=0.99, selected_operand='f(x)=x'):
+        self.learning_rate = learning_rate
+        self.selected_operandQLabel = QLabel('\t{}'.format(selected_operand))
+
+        # initial value of payload['tab1'] to be sent on connect
+        self.tab2_payload = {'learning_rate':0.001}
+
+        #green_print("tab2 variables set up")
+
 
     def setup_tab_2(self):
         self.setup_tab_2_variables()
@@ -287,19 +289,19 @@ class MainWindow(QtWidgets.QWidget):
         self.right_vertical_layout = QVBoxLayout()
         self.OperatorsGroupBox.setLayout( self.right_vertical_layout )
         self.tab2_button1 = QPushButton( '+' )
-        self.tab2_button1.clicked.connect(lambda: self.on_click('+'))
+        self.tab2_button1.clicked.connect(lambda: self.tab_2_button_on_click('+'))
 
         self.tab2_button2 = QPushButton( '-' )
-        self.tab2_button2.clicked.connect(lambda: self.on_click('-'))
+        self.tab2_button2.clicked.connect(lambda: self.tab_2_button_on_click('-'))
 
         self.tab2_button3 = QPushButton( '*' )
-        self.tab2_button3.clicked.connect(lambda: self.on_click('*'))
+        self.tab2_button3.clicked.connect(lambda: self.tab_2_button_on_click('*'))
 
         self.tab2_button4 = QPushButton( '/' )
-        self.tab2_button4.clicked.connect(lambda: self.on_click('/'))
+        self.tab2_button4.clicked.connect(lambda: self.tab_2_button_on_click('/'))
 
         self.tab2_button5 = QPushButton( 'f(x)=x' )
-        self.tab2_button5.clicked.connect(lambda: self.on_click('f(x)=x'))
+        self.tab2_button5.clicked.connect(lambda: self.tab_2_button_on_click('f(x)=x'))
 
         self.right_vertical_layout.addStretch(1)
         self.right_vertical_layout.addWidget( self.tab2_button1 )
@@ -312,7 +314,7 @@ class MainWindow(QtWidgets.QWidget):
         #green_print("tab2 set up")
 
     @pyqtSlot()
-    def on_click(self, selected_operator='f(x)=x'):
+    def tab_2_button_on_click(self, selected_operator='f(x)=x'):
         assert selected_operator in('+','-','/','*','f(x)=x')
         self.selected_operandQLabel.setText('\t{}'.format(selected_operator))
         #green_print(self.selected_operandQLabel.text().strip())
@@ -333,6 +335,26 @@ class MainWindow(QtWidgets.QWidget):
             # calculate effective learning rate and publish to backend
             #print(self.tab2_payload)
             self.send_payload()
+
+
+    def setup_tab_3(self):
+        self.tab3 = QWidget()
+
+        self.horizontalLayout_tab3 = QHBoxLayout(self.tab3)
+
+        self.tab3_dropdown = QComboBox()
+        self.tab3_dropdown.addItems(["both", ".ckpt", ".h5"])
+        #self.tab3_dropdown.setItemText("both")
+
+        self.tab3_button1 = QPushButton('take snapshot')
+        self.tab3_button1.clicked.connect(self.tab_3_button_click)
+
+        self.horizontalLayout_tab3.addWidget(self.tab3_dropdown)
+        self.horizontalLayout_tab3.addWidget(self.tab3_button1)
+
+    @pyqtSlot()
+    def tab_3_button_click(self):
+        print(self.tab3_dropdown.currentText())
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
