@@ -7,7 +7,7 @@ import paho.mqtt.client as mqtt
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from keras_jukebox.utils import red_print
+from keras_jukebox.utils import red_print, green_print, yellow_print, cyan_print
 
 
 class JukeBoxCallback(Callback):
@@ -49,7 +49,7 @@ class JukeBoxCallback(Callback):
     self.publish_data(payload)
 
     self.running = False
-    red_print('called init function')
+    green_print('called init function')
 
   def start_listening(self):
       self.running = True
@@ -57,7 +57,7 @@ class JukeBoxCallback(Callback):
           self.client.loop(timeout=1.0, max_packets=1)
 
   def on_connect(self, client, userdata, flags, rc):
-      red_print("Connected to {} with result code {}".format(self.host,rc))
+      cyan_print("Connected to {} with result code {}".format(self.host,rc))
 
       #send a connection request
       #payload = {'PID':self.PID, 'status': 'not_started'}
@@ -69,14 +69,14 @@ class JukeBoxCallback(Callback):
       self.client.publish(self.publish_topic, payload=payload, qos=qos, retain=retain)
     elif payload==None:
         self.client.publish(self.publish_topic, payload=payload, qos=1, retain=True)
-        red_print("cleared all meassages under topic name {}".format(self.publish_topic))
+        #red_print("cleared all meassages under topic name {}".format(self.publish_topic))
     else:
       red_print("payload was not dictionary, did not send")
 
   def on_message(self,client, userdata, msg):
 
     message = json.loads(msg.payload.decode('utf-8'))
-    print(message)
+    #print(message)
 
     if self.start ==False:
       #connection has not been acknowledged
@@ -91,7 +91,7 @@ class JukeBoxCallback(Callback):
       self.msg = message
       #red_print("got a message")
       if self.verbose > 0:
-        red_print(self.subscribe_topic+" "+str(self.msg))
+        cyan_print(self.subscribe_topic+" "+str(self.msg))
 
       self.update_variables()
 
@@ -120,10 +120,10 @@ class JukeBoxCallback(Callback):
     if not hasattr(self.model.optimizer, 'lr'):
       raise ValueError('Optimizer must have a "lr" attribute.')
 
-    red_print('waiting for a JukeBox')
+    green_print('waiting for a JukeBox')
     while not self.start:
       pass
-    red_print('connected to JukeBox')
+    green_print('connected to JukeBox')
 
     self.backend_learning_rate = float(K.get_value(self.model.optimizer.lr))
     # After connection is ack initialize this lr in GUI
@@ -138,7 +138,7 @@ class JukeBoxCallback(Callback):
     if self.play_status in ['pause', 'stop']:
 
       if self.play_status == 'pause':
-        red_print('paused from frontend')
+        yellow_print('paused from frontend')
 
       if self.play_status == 'stop':
         self.stopped_from_frontend = True
@@ -146,7 +146,7 @@ class JukeBoxCallback(Callback):
 
       while self.play_status =='pause':
         pass
-      red_print('Resuming ..')
+      green_print('Resuming ..')
 
 
     if not hasattr(self.model.optimizer, 'lr'):
@@ -163,7 +163,7 @@ class JukeBoxCallback(Callback):
     #if self.backend_learning_rate != self.frontend_learning_rate:
     if self.update_learning_rate:
       if self.verbose > 0:
-        red_print('updated learning rate from {} to {}'.format(self.backend_learning_rate, self.frontend_learning_rate))
+        yellow_print('updated learning rate from {} to {}'.format(self.backend_learning_rate, self.frontend_learning_rate))
       K.set_value(self.model.optimizer.lr, self.frontend_learning_rate)
 
       self.update_learning_rate = False
@@ -192,6 +192,6 @@ class JukeBoxCallback(Callback):
     if self.stopped_from_frontend:
         red_print("training stopped from JukeBox")
     else:
-        red_print("training complete, terminated naturally")
+        green_print("training complete, terminated naturally")
 
     self.publish_data(payload=None)

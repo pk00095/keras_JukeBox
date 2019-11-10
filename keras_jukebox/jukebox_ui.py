@@ -9,7 +9,7 @@ import paho.mqtt.client as mqtt
 
 from PyQt5.QtCore import pyqtSlot
 
-from keras_jukebox.utils import calculate_efffective_lr, FloatNotEmptyValidator, red_print
+from keras_jukebox.utils import calculate_efffective_lr, FloatNotEmptyValidator, yellow_print, green_print, red_print
 
 
 play_logo_path = pkg_resources.resource_filename('keras_jukebox', 'images/play.png')
@@ -73,7 +73,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.PID = None
         self.client.subscribe(self.subscribe_topic)
-        print("INit done")
+        green_print("INit done")
 
         self.running = False
 
@@ -85,7 +85,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def start_listening(self):
 
-        print('started listening')
+        green_print('started listening')
         self.running = True
         while self.running:
             self.client.loop(timeout=1.0, max_packets=1)
@@ -97,9 +97,9 @@ class MainWindow(QtWidgets.QWidget):
           self.client.publish(self.publish_topic, payload=payload, qos=qos, retain=retain)
         elif payload==None:
             self.client.publish(self.publish_topic, payload=payload, qos=1, retain=True)
-            red_print("cleared all meassages under topic name {}".format(self.publish_topic))
+            yellow_print("cleared all meassages under topic name {}".format(self.publish_topic))
         else:
-          red_print("payload was not dictionary, did not send")
+          yellow_print("payload was not dictionary, did not send")
 
     def send_payload(self):
         payload = {
@@ -110,7 +110,8 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def on_connect(self, client, userdata, flags, rc):
-        print("Connected to {} with result code {}".format(self.host,rc))
+        pass
+        #green_print("Connected to {} with result code {}".format(self.host,rc))
 
         #send a connection request
         #payload = {'PID':self.PID}
@@ -118,7 +119,7 @@ class MainWindow(QtWidgets.QWidget):
     def on_message(self,client, userdata, msg):
 
         message = json.loads(msg.payload.decode('utf-8'))
-        #print(message)
+        #green_print(message)
 
         if self.PID == None: #not yet got any backend
             #assign itself a PID
@@ -133,9 +134,7 @@ class MainWindow(QtWidgets.QWidget):
                 self.publish_topic = 'keras_JukeBox/backend/{}'.format(self.PID)
                 payload = {'status':'acknowledged'}
                 self.publish_data(payload)
-                print('subscribed to PID :: {}'.format(self.PID))
-
-
+                #green_print('subscribed to PID :: {}'.format(self.PID))
 
                 # TO DO unsubscribe from previous topic
                 self.client.unsubscribe(self.subscribe_topic)
@@ -164,13 +163,15 @@ class MainWindow(QtWidgets.QWidget):
         # initial value of payload['tab1'] to be sent on connect
         self.tab2_payload = {'learning_rate':0.001}
 
-        print("tab2 variables set up")
+        #green_print("tab2 variables set up")
 
     def setup_tab_1(self):
         self.tab1 = QWidget()
         self.horizontalLayout_tab1 = QHBoxLayout(self.tab1)
 
         self.button_start = QtWidgets.QPushButton('play') #self.lang["btn_start"])
+        self.button_start.move(20, 40)
+        self.button_start.resize(20,20)
         self.button_start.setIcon(QtGui.QIcon(play_logo_path))
         #self.button_start.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_start.setToolTip("Start Training")    # Message to show when mouse hover
@@ -178,6 +179,7 @@ class MainWindow(QtWidgets.QWidget):
 
 
         self.button_stop = QtWidgets.QPushButton('stop') #self.lang["btn_stop"])
+        self.button_stop.move(20, 60)
         self.button_stop.setIcon(QtGui.QIcon(stop_logo_path))
         #self.button_stop.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_stop.setToolTip("Stop Training")    # Message to show when mouse hover
@@ -186,6 +188,7 @@ class MainWindow(QtWidgets.QWidget):
 
 
         self.button_pause = QtWidgets.QPushButton('pause')
+        self.button_pause.move(20, 80)
         self.button_pause.setIcon(QtGui.QIcon(pause_logo_path))
         #self.button_pause.setIconSize(QtCore.QSize(self.w/10,self.h/10))
         self.button_pause.setToolTip("Pause Training")    # Message to show when mouse hover
@@ -202,13 +205,13 @@ class MainWindow(QtWidgets.QWidget):
         # initial value of payload['tab1'] to be sent on connect
         self.tab1_payload = {'play_status':self.run_status}
 
-        print("tab1 set up")
+        #green_print("tab1 set up")
 
     @pyqtSlot()
     def tab1_response(self, action):
         assert action in self.supported_run_statuses
         self.run_status = action
-        print(self.run_status)
+        #green_print(self.run_status)
         self.tab1_payload = {'play_status':self.run_status}
         #publish to frontend
 
@@ -277,18 +280,18 @@ class MainWindow(QtWidgets.QWidget):
         self.right_vertical_layout.addWidget( button5 )
 
 
-        print("tab2 set up")
+        #green_print("tab2 set up")
 
     @pyqtSlot()
     def on_click(self, selected_operator='f(x)=x'):
         assert selected_operator in('+','-','/','*','f(x)=x')
         self.selected_operandQLabel.setText('\t{}'.format(selected_operator))
-        print(self.selected_operandQLabel.text().strip())
+        #green_print(self.selected_operandQLabel.text().strip())
 
         operand = self.operand_textbox.text()
 
         if operand == '':
-            print('no command send since operand field was empty')
+            red_print('no command sent since operand field was empty')
 
         else:
 
@@ -299,15 +302,15 @@ class MainWindow(QtWidgets.QWidget):
 
             self.tab2_payload = {'learning_rate':eff_lr}
             # calculate effective learning rate and publish to backend
-            print(self.tab2_payload)
+            #print(self.tab2_payload)
             self.send_payload()
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
     ex = App()
-    print('App Init Done.')
+    green_print('App Init Done.')
     sys.exit(app.exec_())
-    print('Done')
+    green_print('Done')
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
