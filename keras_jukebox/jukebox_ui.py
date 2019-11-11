@@ -106,7 +106,8 @@ class MainWindow(QtWidgets.QWidget):
     def send_payload(self):
         payload = {
         'tab1':self.tab1_payload,
-        'tab2':self.tab2_payload
+        'tab2':self.tab2_payload,
+        'tab3':self.tab3_payload
         }
         self.publish_data(payload)
 
@@ -349,12 +350,49 @@ class MainWindow(QtWidgets.QWidget):
         self.tab3_button1 = QPushButton('take snapshot')
         self.tab3_button1.clicked.connect(self.tab_3_button_click)
 
+        # TO DO:
+        # folder picker for location
+
+        # labelbox base name for file_format
+        checkpoint_name_label  = QLabel("Enter checkpoint name : ")
+        self.tab3_checkpoint_name_textbox = QLineEdit()
+
+
+        self.horizontalLayout_tab3.addWidget(checkpoint_name_label)
+        self.horizontalLayout_tab3.addWidget(self.tab3_checkpoint_name_textbox)
         self.horizontalLayout_tab3.addWidget(self.tab3_dropdown)
         self.horizontalLayout_tab3.addWidget(self.tab3_button1)
 
+        self.tab3_payload = {'take_snapshot': False, 'h5':False, 'ckpt': False, 'checkpoint_name':None}
+
     @pyqtSlot()
     def tab_3_button_click(self):
-        print(self.tab3_dropdown.currentText())
+
+        checkpoint_format = self.tab3_dropdown.currentText()
+        checkpoint_name = self.tab3_checkpoint_name_textbox.text()
+
+        if checkpoint_name == '':
+            red_print('checkpoint name is empty')
+            return
+
+        self.tab3_payload = {'take_snapshot': True, 'h5':False, 'ckpt': False, 'checkpoint_name':checkpoint_name}
+        
+        if checkpoint_format == 'both':
+            self.tab3_payload['h5'] = True
+            self.tab3_payload['ckpt'] = True
+
+        elif checkpoint_format == '.ckpt':
+            self.tab3_payload['ckpt'] = True
+
+        else:
+            self.tab3_payload['h5'] = True
+
+
+        # Send command to take a snapshot
+        self.send_payload()
+
+        # set flag to flag after you have sent command for checkpointing
+        self.tab3_payload['take_snapshot'] = False
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
