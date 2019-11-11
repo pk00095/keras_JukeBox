@@ -177,6 +177,24 @@ class JukeBoxCallback(Callback):
     #        'rate to %s.' % (epoch + 1, lr))
 
   def on_batch_end(self, batch, logs=None):
+
+    #check tab3_payload for taking a checkpoint
+
+    tab3_payload = self.msg['tab3']
+    #{'take_snapshot': True, 'h5':False, 'ckpt': False, 'checkpoint_name':checkpoint_name}
+    if tab3_payload['take_snapshot'] :
+      # write function to take snapshot here
+
+      filepath = '' #generate snapshot from os.path.join(folder_name, checkpoint_name{epoch:02d})
+      if tab3_payload['h5']:
+        self.model.save(filepath+'.h5')
+      if tab3_payload['ckpt']:
+        self.model.save_weights(filepath+'.ckpt')
+
+      # after taking a snapshot make it False
+      self.msg['tab3']['take_snapshot'] = False
+
+
     payload = {'learning_rate':self.backend_learning_rate,
     'epoch':self.current_epoch,
     'batch':self.current_batch}
