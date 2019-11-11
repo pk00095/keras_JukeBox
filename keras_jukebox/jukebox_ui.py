@@ -3,7 +3,7 @@ import sys, json, threading, pkg_resources
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton,
                              QHBoxLayout, QGroupBox, QVBoxLayout, QLineEdit,
-                             QLabel, QFormLayout, QComboBox)
+                             QLabel, QFormLayout, QComboBox, QFileDialog)
 
 import paho.mqtt.client as mqtt
 
