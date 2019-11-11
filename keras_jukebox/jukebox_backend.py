@@ -1,6 +1,6 @@
 from tensorflow.keras.callbacks import Callback
 from tensorflow.keras import backend as K
-import threading, sys, json
+import threading, sys, json, os
 import numpy as np
 
 import paho.mqtt.client as mqtt
@@ -184,8 +184,11 @@ class JukeBoxCallback(Callback):
     #{'take_snapshot': True, 'h5':False, 'ckpt': False, 'checkpoint_name':checkpoint_name}
     if tab3_payload['take_snapshot'] :
       # write function to take snapshot here
+      folder_path = tab3_payload['checkpoint_path']
+      checkpoint_name = '{}_{}_{}'.format(tab3_payload['checkpoint_name'], self.current_epoch, self.current_batch)
 
-      filepath = '' #generate snapshot from os.path.join(folder_name, checkpoint_name{epoch:02d})
+
+      filepath = os.path.join(folder_path, checkpoint_name) #generate snapshot from os.path.join(folder_path, checkpoint_name{epoch:02d})
       if tab3_payload['h5']:
         self.model.save(filepath+'.h5')
       if tab3_payload['ckpt']:

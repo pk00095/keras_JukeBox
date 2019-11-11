@@ -356,6 +356,7 @@ class MainWindow(QtWidgets.QWidget):
         # labelbox base name for file_format
         checkpoint_name_label  = QLabel("Enter checkpoint name : ")
         self.tab3_checkpoint_name_textbox = QLineEdit()
+        self.checkpoint_folder = None
 
 
         self.horizontalLayout_tab3.addWidget(checkpoint_name_label)
@@ -363,10 +364,20 @@ class MainWindow(QtWidgets.QWidget):
         self.horizontalLayout_tab3.addWidget(self.tab3_dropdown)
         self.horizontalLayout_tab3.addWidget(self.tab3_button1)
 
-        self.tab3_payload = {'take_snapshot': False, 'h5':False, 'ckpt': False, 'checkpoint_name':None}
+        self.tab3_payload = {
+            'take_snapshot': False, 
+            'h5':False, 
+            'ckpt': False, 
+            'checkpoint_name':None,
+            'checkpoint_path':self.checkpoint_folder}
 
     @pyqtSlot()
     def tab_3_button_click(self):
+
+        if self.checkpoint_folder == None:
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog
+            self.checkpoint_folder = str(QFileDialog.getExistingDirectory(self,"Select folder location", options=options))
 
         checkpoint_format = self.tab3_dropdown.currentText()
         checkpoint_name = self.tab3_checkpoint_name_textbox.text()
@@ -375,7 +386,12 @@ class MainWindow(QtWidgets.QWidget):
             red_print('checkpoint name is empty')
             return
 
-        self.tab3_payload = {'take_snapshot': True, 'h5':False, 'ckpt': False, 'checkpoint_name':checkpoint_name}
+        self.tab3_payload = {
+            'take_snapshot': True, 
+            'h5':False, 
+            'ckpt': False, 
+            'checkpoint_name':checkpoint_name,
+            'checkpoint_path':self.checkpoint_folder}
         
         if checkpoint_format == 'both':
             self.tab3_payload['h5'] = True
