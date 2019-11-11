@@ -374,7 +374,7 @@ class MainWindow(QtWidgets.QWidget):
     @pyqtSlot()
     def tab_3_button_click(self):
 
-        if self.checkpoint_folder == None:
+        if self.checkpoint_folder == None or self.checkpoint_folder == '':
             options = QFileDialog.Options()
             options |= QFileDialog.DontUseNativeDialog
             self.checkpoint_folder = str(QFileDialog.getExistingDirectory(self,"Select folder location", options=options))

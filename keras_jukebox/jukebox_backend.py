@@ -145,6 +145,10 @@ class JukeBoxCallback(Callback):
         self.model.stop_training = True
 
       while self.play_status =='pause':
+        # TO DO take a snapshot if hinted by frontend
+        if self.msg != None: # if self.msg==None, it means session is not yet acknowledged
+          if self.msg['tab3']['take_snapshot']:
+            self.take_a_snapshot()
         pass
       green_print('Resuming ..')
 
@@ -176,6 +180,22 @@ class JukeBoxCallback(Callback):
     #  red_print('\nEpoch %05d: JukeBox reducing learning '
     #        'rate to %s.' % (epoch + 1, lr))
 
+  def take_a_snapshot(self):
+
+    tab3_payload = self.msg['tab3']
+    folder_path = tab3_payload['checkpoint_path']
+    checkpoint_name = '{}_E{}_B{}'.format(tab3_payload['checkpoint_name'], self.current_epoch, self.current_batch)
+
+
+    filepath = os.path.join(folder_path, checkpoint_name) #generate snapshot from os.path.join(folder_path, checkpoint_name{epoch:02d})
+    if tab3_payload['h5']:
+      self.model.save(filepath+'.h5')
+    if tab3_payload['ckpt']:
+      self.model.save_weights(filepath+'.ckpt')
+
+    # after taking a snapshot make it False
+    self.msg['tab3']['take_snapshot'] = False
+
   def on_batch_end(self, batch, logs=None):
 
     #check tab3_payload for taking a checkpoint
@@ -184,18 +204,7 @@ class JukeBoxCallback(Callback):
     #{'take_snapshot': True, 'h5':False, 'ckpt': False, 'checkpoint_name':checkpoint_name}
     if tab3_payload['take_snapshot'] :
       # write function to take snapshot here
-      folder_path = tab3_payload['checkpoint_path']
-      checkpoint_name = '{}_{}_{}'.format(tab3_payload['checkpoint_name'], self.current_epoch, self.current_batch)
-
-
-      filepath = os.path.join(folder_path, checkpoint_name) #generate snapshot from os.path.join(folder_path, checkpoint_name{epoch:02d})
-      if tab3_payload['h5']:
-        self.model.save(filepath+'.h5')
-      if tab3_payload['ckpt']:
-        self.model.save_weights(filepath+'.ckpt')
-
-      # after taking a snapshot make it False
-      self.msg['tab3']['take_snapshot'] = False
+      self.take_a_snapshot()
 
 
     payload = {'learning_rate':self.backend_learning_rate,
