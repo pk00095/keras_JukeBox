@@ -8,6 +8,7 @@ This is a UI based hyper-parameter controller, which let's you control the follo
 
 * start, pause and stop a live training.
 * reset the learning rate on dynamically while training is in progress.
+* take a snapshot at will
 
 more functionalities are to be added
 
@@ -59,7 +60,7 @@ Now, in a separate terminal, type:
 
 ```
 
-start_JukeBox
+start_jukebox
 
 ```
 
