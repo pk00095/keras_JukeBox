@@ -91,7 +91,8 @@ class JukeBoxCallback(Callback):
       self.msg = message
       #red_print("got a message")
       if self.verbose > 0:
-        cyan_print(self.subscribe_topic+" "+str(self.msg))
+        cyan_print("Received a new command from JukeBox")
+        #cyan_print(self.subscribe_topic+" "+str(self.msg))
 
       self.update_variables()
 
@@ -192,6 +193,9 @@ class JukeBoxCallback(Callback):
       self.model.save(filepath+'.h5')
     if tab3_payload['ckpt']:
       self.model.save_weights(filepath+'.ckpt')
+
+    if self.verbose >0:
+      yellow_print("Took a snapshot at Epoch-{}, at batch-{}".format(self.current_epoch, self.current_batch))
 
     # after taking a snapshot make it False
     self.msg['tab3']['take_snapshot'] = False

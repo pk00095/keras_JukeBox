@@ -37,26 +37,46 @@ Python dependencies:
 
 # Usage
 
-import as 
+you can try the following example
+
+**fashion_mnist_jukebox.py**
 
 ```
+from __future__ import absolute_import, division, print_function, unicode_literals
 
+import tensorflow as tf
+from tensorflow import keras
+
+
+# import the callback
 from keras_jukebox import JukeBoxCallback
 
+
+fashion_mnist = keras.datasets.fashion_mnist
+
+(train_images, train_labels), (test_images, test_labels) = fashion_mnist.load_data()
+
+
+train_images = train_images / 255.0
+
+test_images = test_images / 255.0
+
+model = keras.Sequential([
+    keras.layers.Flatten(input_shape=(28, 28)),
+    keras.layers.Dense(128, activation='relu'),
+    keras.layers.Dense(10, activation='softmax')
+])
+
+
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+# pass the jukebox callback to model.fit method
+model.fit(train_images, train_labels, epochs=10, callbacks=[JukeBoxCallback(verbose=1)])
 ```
 
-and pass it to the fit method of `keras.model`
-
-as follows :
-
-```
-
-model.fit(train_images, train_labels, epochs=20, callbacks=[JukeBoxCallback(verbose=True)])
-
-```
-
-and run your training script. You will note that the script gets blocked, this is because it is waiting for a JukeBox UI to capture it's session. 
-Now, in a separate terminal, type:
+Now, open a new terminal and start the JukeBox by typing:
 
 ```
 
