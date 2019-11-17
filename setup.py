@@ -1,6 +1,6 @@
 import setuptools
 
-__version__="0.0.2"
+__version__="0.0.3"
 
 with open("README.md","r") as f:
 	long_description = f.read()
@@ -13,7 +13,7 @@ setuptools.setup(
 	description="A UI based callback for tf-keras",
 	long_description=long_description,
 	long_description_content_type="text/markdown",
-	url="https://github.com/pk00095/keras_jukebox/archive/0.0.2.tar.gz",
+	url="https://github.com/pk00095/keras_jukebox/archive/0.0.3.tar.gz",
 	packages=setuptools.find_packages(),
 	install_requires=['PyQt5','paho-mqtt'],
 	entry_points={
