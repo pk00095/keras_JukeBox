@@ -39,7 +39,7 @@ Python dependencies:
 
 you can try the following example
 
-**fashion_mnist_jukebox.py**
+save the follwing example **fashion_mnist_jukebox.py**
 
 ```
 from __future__ import absolute_import, division, print_function, unicode_literals
@@ -76,7 +76,10 @@ model.compile(optimizer='adam',
 model.fit(train_images, train_labels, epochs=10, callbacks=[JukeBoxCallback(verbose=1)])
 ```
 
-Now, open a new terminal and start the JukeBox by typing:
+and run it.
+You will notice that the script starts but training doesn't, which is because it is paused and needs a JukeBox-UI to start.
+
+Now, open a new terminal(Alt+ctrl+T) and start the JukeBox by typing:
 
 ```
 
