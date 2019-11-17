@@ -7,28 +7,28 @@ logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(levelname)s:%(mes
 #logging.basicConfig(format=_format)
 
 def black_print(text):
-    logging.info('\033[30m{}\033[0m'.format(text))
+    logging.info('\n\033[30m{}\033[0m'.format(text))
 
 def red_print(text):
-    logging.info('\033[31m{}\033[0m'.format(text))
+    logging.info('\n\033[31m{}\033[0m'.format(text))
 
 def green_print(text):
-    logging.info('\033[32m{}\033[0m'.format(text))
+    logging.info('\n\033[32m{}\033[0m'.format(text))
 
 def yellow_print(text):
-    logging.info('\033[33m{}\033[0m'.format(text))
+    logging.info('\n\033[33m{}\033[0m'.format(text))
 
 def blue_print(text):
-    logging.info('\033[34m{}\033[0m'.format(text))
+    logging.info('\n\033[34m{}\033[0m'.format(text))
 
 def magenta_print(text):
-    logging.info('\033[35m{}\033[0m'.format(text))
+    logging.info('\n\033[35m{}\033[0m'.format(text))
 
 def cyan_print(text):
-    logging.info('\033[36m{}\033[0m'.format(text))
+    logging.info('\n\033[36m{}\033[0m'.format(text))
 
 def gray_print(text):
-    logging.info('\033[90m{}\033[0m'.format(text))
+    logging.info('\n\033[90m{}\033[0m'.format(text))
     
 
 class FloatNotEmptyValidator(QtGui.QValidator):
