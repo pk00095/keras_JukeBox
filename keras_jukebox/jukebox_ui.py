@@ -247,6 +247,7 @@ class MainWindow(QtWidgets.QWidget):
 
     def setup_tab_2_variables(self, learning_rate=0.99, selected_operand='f(x)=x'):
         self.learning_rate = learning_rate
+        self.proposed=learning_rate;
         self.selected_operandQLabel = QLabel('\t{}'.format(selected_operand))
 
         # initial value of payload['tab1'] to be sent on connect
@@ -259,13 +260,13 @@ class MainWindow(QtWidgets.QWidget):
         self.setup_tab_2_variables()
         self.tab2 = QWidget()
         self.horizontalLayout_tab2 = QHBoxLayout(self.tab2)
-
         self.OperandsGroupBox = QGroupBox( "Operands" )
         self.horizontalLayout_tab2.addWidget(self.OperandsGroupBox)
         self.left_vertical_layout = QVBoxLayout()
         self.OperandsGroupBox.setLayout(self.left_vertical_layout)
 
         self.lr_label = QLabel("Current lr : {}".format(self.learning_rate))
+        self.proposed_lr_label = QLabel("proposed lr : {}".format(self.learning_rate))
         factor_label  = QLabel("Factor : ")
 
         self.operand_textbox = QLineEdit()
@@ -277,8 +278,10 @@ class MainWindow(QtWidgets.QWidget):
         self.left_vertical_layout.addWidget(self.current_epoch_label_tab2)
         self.left_vertical_layout.addWidget(self.current_batch_label_tab2)
 
-        self.left_vertical_layout.addStretch(1)
+        # self.left_vertical_layout.addStretch(1)
         self.left_vertical_layout.addWidget(self.lr_label)
+        # self.left_vertical_layout.addStretch(1)
+        self.left_vertical_layout.addWidget(self.proposed_lr_label)
 
         self.left_vertical_layout.addWidget(self.selected_operandQLabel)
         self.left_vertical_layout.addWidget(factor_label)
@@ -304,12 +307,16 @@ class MainWindow(QtWidgets.QWidget):
         self.tab2_button5 = QPushButton( 'f(x)=x' )
         self.tab2_button5.clicked.connect(lambda: self.tab_2_button_on_click('f(x)=x'))
 
+        self.tab2_button6 = QPushButton( 'set' )
+        self.tab2_button6.clicked.connect(self.on_click_button6)
+        
         self.right_vertical_layout.addStretch(1)
         self.right_vertical_layout.addWidget( self.tab2_button1 )
         self.right_vertical_layout.addWidget( self.tab2_button2 )
         self.right_vertical_layout.addWidget( self.tab2_button3 )
         self.right_vertical_layout.addWidget( self.tab2_button4 )
         self.right_vertical_layout.addWidget( self.tab2_button5 )
+        self.right_vertical_layout.addWidget( self.tab2_button6 )
 
 
         #green_print("tab2 set up")
@@ -326,17 +333,23 @@ class MainWindow(QtWidgets.QWidget):
             red_print('no command sent since operand field was empty')
 
         else:
-
-            eff_lr =calculate_efffective_lr(
-                initial_lr=self.learning_rate, 
+            self.proposed =calculate_efffective_lr(
+                initial_lr=self.proposed, 
                 operator=self.selected_operandQLabel.text().strip(), 
                 operand=float(operand))
+            self.proposed_lr_label.setText("Proposed :"+str(self.proposed))
+            self.tab2_payload = {'learning_rate':self.proposed}
 
-            self.tab2_payload = {'learning_rate':eff_lr}
             # calculate effective learning rate and publish to backend
             #print(self.tab2_payload)
+            # self.send_payload()
+    
+    @pyqtSlot()
+    def on_click_button6(self):
+        if self.proposed!=self.learning_rate :
             self.send_payload()
-
+            self.learning_rate=self.proposed
+            self.lr_label.setText("Current lr "+ str(self.learning_rate))
 
     def setup_tab_3(self):
         self.tab3 = QWidget()
