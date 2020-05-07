@@ -148,8 +148,9 @@ class JukeBoxCallback(Callback):
       while self.play_status =='pause':
         # TO DO take a snapshot if hinted by frontend
         if self.msg != None: # if self.msg==None, it means session is not yet acknowledged
-          if self.msg['tab3']['take_snapshot']:
-            self.take_a_snapshot()
+          if 'tab3' in self.msg:
+            if self.msg['tab3']['take_snapshot']:
+              self.take_a_snapshot()
         pass
       green_print('Resuming ..')
 
@@ -210,10 +211,12 @@ class JukeBoxCallback(Callback):
       # write function to take snapshot here
       self.take_a_snapshot()
 
-
-    payload = {'learning_rate':self.backend_learning_rate,
+    payload = {
+    'learning_rate':self.backend_learning_rate,
     'epoch':self.current_epoch,
-    'batch':self.current_batch}
+    'batch':self.current_batch,
+    'logs':str(logs['loss'])
+    }
 
     self.publish_data(payload)
 

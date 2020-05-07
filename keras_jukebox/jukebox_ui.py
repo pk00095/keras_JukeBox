@@ -7,8 +7,9 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton,
 
 import paho.mqtt.client as mqtt
 
-from PyQt5.QtCore import pyqtSlot
-
+from PyQt5.QtCore import pyqtSlot,QTimer
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 from keras_jukebox.utils import calculate_efffective_lr, FloatNotEmptyValidator, yellow_print, green_print, red_print
 
 
@@ -36,8 +37,6 @@ class MainWindow(QtWidgets.QWidget):
         self.run_status = 'pause'      
         self.supported_run_statuses = ['play','pause','stop']
         self.initial_operand_value = 1e-5
-
-
         self.current_epoch = 0
         self.current_batch = 0
 
@@ -46,19 +45,22 @@ class MainWindow(QtWidgets.QWidget):
 
         self.current_epoch_label_tab1 = QLabel("Current Epoch : {}".format(self.current_epoch))
         self.current_batch_label_tab1 = QLabel("Current Batch : {}".format(self.current_batch))
-
-
+        self.logs=[]
+        self.x=[]
+        self.maxx_points=1000
+        self.change_in_points=False
         # Run this after settings
         # Initialize tabs
         tab_holder = QtWidgets.QTabWidget()   # Create tab holder
         self.setup_tab_1() 
         self.setup_tab_2()          # Tab one
         self.setup_tab_3()
+        self.setup_tab_4()
         # Add tabs
         tab_holder.addTab(self.tab1, "Tab 1") #self.lang["tab_1_title"]) # Add "tab1" to the tabs holder "tabs"
         tab_holder.addTab(self.tab2, "Tab 2") #self.lang["tab_2_title"]) # Add "tab2" to the tabs holder "tabs"
         tab_holder.addTab(self.tab3, "Tab 3") 
-
+        tab_holder.addTab(self.tab4, "Tab 4")
         layout.addWidget(tab_holder)
 
 
@@ -146,6 +148,13 @@ class MainWindow(QtWidgets.QWidget):
 
         else:
             self.learning_rate = message['learning_rate']
+            if 'logs' in message:
+                if message['logs'] !=0 :
+                    self.logs.append(float(message['logs']))
+                    # self.logs=self.logs[-self.maxx_points:]
+                    # if self.tab_holder.currentIndex()==self.tab4 :
+                    # self.graph()
+            
             self.lr_label.setText(str(self.learning_rate))
             #self.lr_label = QLabel("Current lr : {}".format(self.learning_rate))
 
@@ -157,7 +166,6 @@ class MainWindow(QtWidgets.QWidget):
 
             self.current_epoch_label_tab1.setText("Current Epoch : {}".format(self.current_epoch))
             self.current_batch_label_tab1.setText("Current Batch : {}".format(self.current_batch))
-
 
     def setup_tab_1(self):
         self.tab1 = QWidget()
@@ -249,7 +257,6 @@ class MainWindow(QtWidgets.QWidget):
         self.learning_rate = learning_rate
         self.proposed=learning_rate;
         self.selected_operandQLabel = QLabel('\t{}'.format(selected_operand))
-
         # initial value of payload['tab1'] to be sent on connect
         self.tab2_payload = {'learning_rate':0.001}
 
@@ -266,7 +273,7 @@ class MainWindow(QtWidgets.QWidget):
         self.OperandsGroupBox.setLayout(self.left_vertical_layout)
 
         self.lr_label = QLabel("Current lr : {}".format(self.learning_rate))
-        self.proposed_lr_label = QLabel("proposed lr : {}".format(self.learning_rate))
+        self.proposed_lr_label = QLabel("Proposed lr : {}".format(self.learning_rate))
         factor_label  = QLabel("Factor : ")
 
         self.operand_textbox = QLineEdit()
@@ -326,7 +333,6 @@ class MainWindow(QtWidgets.QWidget):
         assert selected_operator in('+','-','/','*','f(x)=x')
         self.selected_operandQLabel.setText('\t{}'.format(selected_operator))
         #green_print(self.selected_operandQLabel.text().strip())
-
         operand = self.operand_textbox.text()
 
         if operand == '':
@@ -337,7 +343,7 @@ class MainWindow(QtWidgets.QWidget):
                 initial_lr=self.proposed, 
                 operator=self.selected_operandQLabel.text().strip(), 
                 operand=float(operand))
-            self.proposed_lr_label.setText("Proposed :"+str(self.proposed))
+            self.proposed_lr_label.setText("Proposed lr : {}".format(self.proposed))
             self.tab2_payload = {'learning_rate':self.proposed}
 
             # calculate effective learning rate and publish to backend
@@ -422,6 +428,22 @@ class MainWindow(QtWidgets.QWidget):
 
         # set flag to flag after you have sent command for checkpointing
         self.tab3_payload['take_snapshot'] = False
+    def setup_tab_4(self):
+        self.tab4 = pg.PlotWidget(background='w')
+        self.tab4.setRange(xRange=(0,self.maxx_points), yRange=(0,1))
+        for i in range(self.maxx_points):
+            self.x.append(int(i))
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.graph)
+        self.timer.start()      
+    
+    def graph(self):
+        self.tab4.clear()
+        self.logs=self.logs[-self.maxx_points:]
+        self.tab4.plot(y=self.logs[0:self.maxx_points-3],pen=(0,0,0))
+
+        # if len(self.logs)>=self.maxx_points-3 :
+        #     self.tab4.plot(self.x[0:self.maxx_points-3],self.logs[0:self.maxx_points-3],pen='b')
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
