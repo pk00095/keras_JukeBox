@@ -47,21 +47,21 @@ class MainWindow(QtWidgets.QWidget):
         self.current_batch_label_tab1 = QLabel("Current Batch : {}".format(self.current_batch))
         self.logs=[]
         self.x=[]
-        self.maxx_points=1000
+        self.maxx_points=100
         self.change_in_points=False
         # Run this after settings
         # Initialize tabs
-        tab_holder = QtWidgets.QTabWidget()   # Create tab holder
+        self.tab_holder = QtWidgets.QTabWidget()   # Create tab holder
         self.setup_tab_1() 
         self.setup_tab_2()          # Tab one
         self.setup_tab_3()
         self.setup_tab_4()
         # Add tabs
-        tab_holder.addTab(self.tab1, "Tab 1") #self.lang["tab_1_title"]) # Add "tab1" to the tabs holder "tabs"
-        tab_holder.addTab(self.tab2, "Tab 2") #self.lang["tab_2_title"]) # Add "tab2" to the tabs holder "tabs"
-        tab_holder.addTab(self.tab3, "Tab 3") 
-        tab_holder.addTab(self.tab4, "Tab 4")
-        layout.addWidget(tab_holder)
+        self.tab_holder.addTab(self.tab1, "Tab 1") #self.lang["tab_1_title"]) # Add "tab1" to the tabs holder "tabs"
+        self.tab_holder.addTab(self.tab2, "Tab 2") #self.lang["tab_2_title"]) # Add "tab2" to the tabs holder "tabs"
+        self.tab_holder.addTab(self.tab3, "Tab 3") 
+        self.tab_holder.addTab(self.tab4, "Tab 4")
+        layout.addWidget(self.tab_holder)
 
 
         self.host = host
@@ -151,7 +151,7 @@ class MainWindow(QtWidgets.QWidget):
             if 'logs' in message:
                 if message['logs'] !=0 :
                     self.logs.append(float(message['logs']))
-                    # self.logs=self.logs[-self.maxx_points:]
+                    self.logs=self.logs[-self.maxx_points:]
                     # if self.tab_holder.currentIndex()==self.tab4 :
                     # self.graph()
             
@@ -435,15 +435,12 @@ class MainWindow(QtWidgets.QWidget):
             self.x.append(int(i))
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.graph)
-        self.timer.start()      
+        self.timer.start(100)      
     
     def graph(self):
-        self.tab4.clear()
-        self.logs=self.logs[-self.maxx_points:]
-        self.tab4.plot(y=self.logs[0:self.maxx_points-3],pen=(0,0,0))
-
-        # if len(self.logs)>=self.maxx_points-3 :
-        #     self.tab4.plot(self.x[0:self.maxx_points-3],self.logs[0:self.maxx_points-3],pen='b')
+        if self.tab_holder.currentIndex()==3:
+            self.tab4.clear()
+            self.tab4.plot(y=self.logs[0:self.maxx_points-3],pen=(0,0,0))
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
