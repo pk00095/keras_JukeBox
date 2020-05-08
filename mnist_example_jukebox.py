@@ -30,4 +30,4 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 
-model.fit(train_images, train_labels, epochs=10, callbacks=[JukeBoxCallback(verbose=0)])
+model.fit(train_images, train_labels, batch_size=128,epochs=10, callbacks=[JukeBoxCallback(verbose=0)])
