@@ -14,7 +14,7 @@ more functionalities are to be added
 
 # Dependencies
 
-This package depends on **MQTT** protocol for communication. So, it is expected that an MQTT broker is up and running in 'localhost' at port 1883(default port).
+This package depends on **MQTT** protstart_jukeboxocol for communication. So, it is expected that an MQTT broker is up and running in 'localhost' at port 1883(default port).
 
 Install it by :
 

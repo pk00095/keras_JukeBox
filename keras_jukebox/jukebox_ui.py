@@ -7,8 +7,9 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton,
 
 import paho.mqtt.client as mqtt
 
-from PyQt5.QtCore import pyqtSlot
-
+from PyQt5.QtCore import pyqtSlot,QTimer
+from pyqtgraph import PlotWidget, plot
+import pyqtgraph as pg
 from keras_jukebox.utils import calculate_efffective_lr, FloatNotEmptyValidator, yellow_print, green_print, red_print
 
 
@@ -36,8 +37,6 @@ class MainWindow(QtWidgets.QWidget):
         self.run_status = 'pause'      
         self.supported_run_statuses = ['play','pause','stop']
         self.initial_operand_value = 1e-5
-
-
         self.current_epoch = 0
         self.current_batch = 0
 
@@ -46,20 +45,23 @@ class MainWindow(QtWidgets.QWidget):
 
         self.current_epoch_label_tab1 = QLabel("Current Epoch : {}".format(self.current_epoch))
         self.current_batch_label_tab1 = QLabel("Current Batch : {}".format(self.current_batch))
-
-
+        self.logs=[]
+        self.x=[]
+        self.maxx_points=100
+        self.change_in_points=False
         # Run this after settings
         # Initialize tabs
-        tab_holder = QtWidgets.QTabWidget()   # Create tab holder
+        self.tab_holder = QtWidgets.QTabWidget()   # Create tab holder
         self.setup_tab_1() 
         self.setup_tab_2()          # Tab one
         self.setup_tab_3()
+        self.setup_tab_4()
         # Add tabs
-        tab_holder.addTab(self.tab1, "Tab 1") #self.lang["tab_1_title"]) # Add "tab1" to the tabs holder "tabs"
-        tab_holder.addTab(self.tab2, "Tab 2") #self.lang["tab_2_title"]) # Add "tab2" to the tabs holder "tabs"
-        tab_holder.addTab(self.tab3, "Tab 3") 
-
-        layout.addWidget(tab_holder)
+        self.tab_holder.addTab(self.tab1, "Tab 1") #self.lang["tab_1_title"]) # Add "tab1" to the tabs holder "tabs"
+        self.tab_holder.addTab(self.tab2, "Tab 2") #self.lang["tab_2_title"]) # Add "tab2" to the tabs holder "tabs"
+        self.tab_holder.addTab(self.tab3, "Tab 3") 
+        self.tab_holder.addTab(self.tab4, "Tab 4")
+        layout.addWidget(self.tab_holder)
 
 
         self.host = host
@@ -146,6 +148,13 @@ class MainWindow(QtWidgets.QWidget):
 
         else:
             self.learning_rate = message['learning_rate']
+            if 'logs' in message:
+                if message['logs'] !=0 :
+                    self.logs.append(float(message['logs']))
+                    self.logs=self.logs[-self.maxx_points:]
+                    # if self.tab_holder.currentIndex()==self.tab4 :
+                    # self.graph()
+            
             self.lr_label.setText(str(self.learning_rate))
             #self.lr_label = QLabel("Current lr : {}".format(self.learning_rate))
 
@@ -157,7 +166,6 @@ class MainWindow(QtWidgets.QWidget):
 
             self.current_epoch_label_tab1.setText("Current Epoch : {}".format(self.current_epoch))
             self.current_batch_label_tab1.setText("Current Batch : {}".format(self.current_batch))
-
 
     def setup_tab_1(self):
         self.tab1 = QWidget()
@@ -247,8 +255,8 @@ class MainWindow(QtWidgets.QWidget):
 
     def setup_tab_2_variables(self, learning_rate=0.99, selected_operand='f(x)=x'):
         self.learning_rate = learning_rate
+        self.proposed=learning_rate;
         self.selected_operandQLabel = QLabel('\t{}'.format(selected_operand))
-
         # initial value of payload['tab1'] to be sent on connect
         self.tab2_payload = {'learning_rate':0.001}
 
@@ -259,13 +267,13 @@ class MainWindow(QtWidgets.QWidget):
         self.setup_tab_2_variables()
         self.tab2 = QWidget()
         self.horizontalLayout_tab2 = QHBoxLayout(self.tab2)
-
         self.OperandsGroupBox = QGroupBox( "Operands" )
         self.horizontalLayout_tab2.addWidget(self.OperandsGroupBox)
         self.left_vertical_layout = QVBoxLayout()
         self.OperandsGroupBox.setLayout(self.left_vertical_layout)
 
         self.lr_label = QLabel("Current lr : {}".format(self.learning_rate))
+        self.proposed_lr_label = QLabel("Proposed lr : {}".format(self.learning_rate))
         factor_label  = QLabel("Factor : ")
 
         self.operand_textbox = QLineEdit()
@@ -277,8 +285,10 @@ class MainWindow(QtWidgets.QWidget):
         self.left_vertical_layout.addWidget(self.current_epoch_label_tab2)
         self.left_vertical_layout.addWidget(self.current_batch_label_tab2)
 
-        self.left_vertical_layout.addStretch(1)
+        # self.left_vertical_layout.addStretch(1)
         self.left_vertical_layout.addWidget(self.lr_label)
+        # self.left_vertical_layout.addStretch(1)
+        self.left_vertical_layout.addWidget(self.proposed_lr_label)
 
         self.left_vertical_layout.addWidget(self.selected_operandQLabel)
         self.left_vertical_layout.addWidget(factor_label)
@@ -304,12 +314,16 @@ class MainWindow(QtWidgets.QWidget):
         self.tab2_button5 = QPushButton( 'f(x)=x' )
         self.tab2_button5.clicked.connect(lambda: self.tab_2_button_on_click('f(x)=x'))
 
+        self.tab2_button6 = QPushButton( 'set' )
+        self.tab2_button6.clicked.connect(self.on_click_button6)
+        
         self.right_vertical_layout.addStretch(1)
         self.right_vertical_layout.addWidget( self.tab2_button1 )
         self.right_vertical_layout.addWidget( self.tab2_button2 )
         self.right_vertical_layout.addWidget( self.tab2_button3 )
         self.right_vertical_layout.addWidget( self.tab2_button4 )
         self.right_vertical_layout.addWidget( self.tab2_button5 )
+        self.right_vertical_layout.addWidget( self.tab2_button6 )
 
 
         #green_print("tab2 set up")
@@ -319,24 +333,29 @@ class MainWindow(QtWidgets.QWidget):
         assert selected_operator in('+','-','/','*','f(x)=x')
         self.selected_operandQLabel.setText('\t{}'.format(selected_operator))
         #green_print(self.selected_operandQLabel.text().strip())
-
         operand = self.operand_textbox.text()
 
         if operand == '':
             red_print('no command sent since operand field was empty')
 
         else:
-
-            eff_lr =calculate_efffective_lr(
-                initial_lr=self.learning_rate, 
+            self.proposed =calculate_efffective_lr(
+                initial_lr=self.proposed, 
                 operator=self.selected_operandQLabel.text().strip(), 
                 operand=float(operand))
+            self.proposed_lr_label.setText("Proposed lr : {}".format(self.proposed))
+            self.tab2_payload = {'learning_rate':self.proposed}
 
-            self.tab2_payload = {'learning_rate':eff_lr}
             # calculate effective learning rate and publish to backend
             #print(self.tab2_payload)
+            # self.send_payload()
+    
+    @pyqtSlot()
+    def on_click_button6(self):
+        if self.proposed!=self.learning_rate :
             self.send_payload()
-
+            self.learning_rate=self.proposed
+            self.lr_label.setText("Current lr "+ str(self.learning_rate))
 
     def setup_tab_3(self):
         self.tab3 = QWidget()
@@ -409,6 +428,19 @@ class MainWindow(QtWidgets.QWidget):
 
         # set flag to flag after you have sent command for checkpointing
         self.tab3_payload['take_snapshot'] = False
+    def setup_tab_4(self):
+        self.tab4 = pg.PlotWidget(background='w')
+        self.tab4.setRange(xRange=(0,self.maxx_points), yRange=(0,1))
+        for i in range(self.maxx_points):
+            self.x.append(int(i))
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.graph)
+        self.timer.start(100)      
+    
+    def graph(self):
+        if self.tab_holder.currentIndex()==3:
+            self.tab4.clear()
+            self.tab4.plot(y=self.logs[0:self.maxx_points-3],pen=(0,0,0))
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
